@@ -8,8 +8,6 @@ This extension allows you to use an HX711 module with the micro:bit as a weighin
 
 The library myHX711 provides a set of functions to allow you to measure weight.
 
-![](HX711_functions.jpeg)
-
 ## begin
 
 ||begin||
