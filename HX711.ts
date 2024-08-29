@@ -18,29 +18,16 @@ namespace HX711 {
    */
 
   /**
-   * Set pin at which the DOUT line is connected
+   * Set pin at which the SCK and DOUT line is connected
    * @param pinDOUT pin at which the HX data line is connected
-   */
-
-  //% blockId="SET_DOUT" block="HX711 set DataPin %pinDOUT"
-  //% weight=100 blockGap=8
-  export function SetPIN_DOUT(pinDOUT: DigitalPin): void {
-    DOUT = pinDOUT;
-  }
-
-  /**
-   * Set pin at which the SCK line is connected
    * @param pinPD_SCK pin at which the HX data line is connected
    */
-  //% blockId="SET_SCK" block="HX711 set ClockPin %pinPD_SCK"
+  //% blockId="HX711_BEGIN" block="DT:%pinDOUT| SCK:%pinPD_SCK| begin"
   //% weight=100 blockGap=8
-  export function SetPIN_SCK(pinPD_SCK: DigitalPin): void {
-    PD_SCK = pinPD_SCK;
-  }
+  export function begin(pinDOUT: DigitalPin, pinPD_SCK: DigitalPin): void {
+    pinPD_SCK: DigitalPin;
+    DOUT = pinDOUT;
 
-  //% blockId="HX711_BEGIN" block="begin"
-  //% weight=80 blockGap=8
-  export function begin() {
     set_gain(128); //default gain 128
   }
 
@@ -72,10 +59,7 @@ namespace HX711 {
       pins.digitalWritePin(PD_SCK, 1);
       control.waitMicros(1);
       if (bitOrder == 0) value |= pins.digitalReadPin(DOUT) << i;
-      //value = value + (pins.digitalReadPin(DOUT) * 2 ^ i)
       else value |= pins.digitalReadPin(DOUT) << (7 - i);
-      //value = value + (pins.digitalReadPin(DOUT) * 2 ^ (7 - i))
-      //value = value | (pins.digitalReadPin(DOUT) << (7 - i))
       pins.digitalWritePin(PD_SCK, 0);
       control.waitMicros(1);
     }
@@ -105,15 +89,15 @@ namespace HX711 {
     // interrupts during the sequence and then restores the interrupt mask to its previous
     // state after the sequence completes, insuring that the entire read-and-gain-set
     // sequence is not interrupted.  The macro has a few minor advantages over bracketing
-    // the sequence between `noInterrupts()` and `interrupts()` calls.
+    // the sequence between `noInterrupts()` and `interrupts()` calls...
 
-    // Pulse the clock pin 24 times to read the data.
+    // ..."skipping the critical section & interupt"
+
     //LSBFIRST = 0,
     //MSBFIRST = 1
-    //data[2] = shiftInSlow(DOUT, PD_SCK, MSBFIRST)
-    //data[1] = shiftInSlow(DOUT, PD_SCK, MSBFIRST)
-    //data[0] = shiftInSlow(DOUT, PD_SCK, MSBFIRST)
+    //data[i] = SHIFTIN_WITH_SPEED_SUPPORT(DOUT, PD_SCK, MSBFIRST) -> shiftInSlow(1)
 
+    // Pulse the clock pin 24 times to read the data.
     data[2] = shiftInSlow(1);
     data[1] = shiftInSlow(1);
     data[0] = shiftInSlow(1);
@@ -133,11 +117,9 @@ namespace HX711 {
     } else {
       filler = 0x00;
     }
-    // data[2] = data[2] ^ 0x80 //shift MSB
 
     // Construct a 32-bit signed integer
     value = (filler << 24) | (data[2] << 16) | (data[1] << 8) | data[0];
-    //value = ((filler * 16777216) + (data[2] * 65536) + (data[1] * 256) + (data[0]))
 
     return value;
   }
@@ -215,7 +197,7 @@ namespace HX711 {
   }
 
   //% blockId="HX711_TARE" block="tare %times"
-  //% weight=80 blockGap=8
+  //% weight=95 blockGap=8
   export function tare(times: number) {
     let sum: number = 0;
     sum = read_average(times);
@@ -223,38 +205,38 @@ namespace HX711 {
   }
 
   //% blockId="HX711_SET_SCALE" block="set scale %scale"
-  //% weight=80 blockGap=8
+  //% weight=99 blockGap=8
   export function set_scale(scale: number) {
     SCALE = scale;
   }
 
   //% blockId="HX711_GET_SCALE" block="get scale"
-  //% weight=80 blockGap=8
+  //% weight=98 blockGap=8
   export function get_scale(): number {
     return SCALE;
   }
 
   //% blockId="HX711_SET_OFFSET" block="set offset %offset"
-  //% weight=80 blockGap=8
+  //% weight=97 blockGap=8
   export function set_offset(offset: number) {
     OFFSET = offset;
   }
 
   //% blockId="HX711_GET_OFFSET" block="get offset"
-  //% weight=80 blockGap=8
+  //% weight=96 blockGap=8
   export function get_offset(): number {
     return OFFSET;
   }
 
   //% blockId="HX711_DOWN" block="power_down"
-  //% weight=90 blockGap=8
+  //% weight=93 blockGap=16
   export function power_down() {
     pins.digitalWritePin(PD_SCK, 0);
     pins.digitalWritePin(PD_SCK, 1);
   }
 
   //% blockId="HX711_UP" block="power_up"
-  //% weight=90 blockGap=8
+  //% weight=94 blockGap=8
   export function power_up() {
     pins.digitalWritePin(PD_SCK, 0);
   }
