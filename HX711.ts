@@ -11,6 +11,7 @@ namespace HX711 {
   let GAIN: number = 0.0;
   let OFFSET: number = 0; // used for tare weight
   let SCALE: number = 1; // used to return weight in grams, kg, ounces, whatever
+  let CAL_RATIO: number = 1.0;
 
   /**
    * Query data from HX711 module.
@@ -67,7 +68,7 @@ namespace HX711 {
   }
 
   //% blockId="HX711_READ" block="read"
-  //% weight=80 blockGap=8
+  //% weight=30 blockGap=8
   export function read(): number {
     // Wait for the chip to become ready.
     wait_ready(0);
@@ -161,7 +162,7 @@ namespace HX711 {
   }
 
   //% blockId="HX711_READ_AVERAGE" block="read N averaged raw data %times"
-  //% weight=80 blockGap=8
+  //% weight=30 blockGap=8
   export function read_average(times: number): number {
     let sum: number = 0;
     let i: number = 0;
@@ -173,19 +174,25 @@ namespace HX711 {
   }
 
   //% blockId="HX711_GET_VALUE" block="get N averaged offsetted data %times"
-  //% weight=80 blockGap=8
+  //% weight=30 blockGap=8
   export function get_value(times: number): number {
     return read_average(times) - OFFSET;
   }
 
+  //% blockId="HX711_CALIBRATE" block="Calibrate with %weight kg"
+  //% weight=95 blockGap=8
+  export function calibrate(weight: number) {
+    CAL_RATIO = weight / (read_average(10) - OFFSET);
+  }
+
   //% blockId="HX711_GET_UNITS" block="get N averaged final scaled value %times"
-  //% weight=80 blockGap=8
+  //% weight=35 blockGap=32
   export function get_units(times: number): number {
     let valor: number = 0;
     //let valor_string: string = ""
     //let ceros: string = ""
 
-    valor = get_value(times) / SCALE;
+    valor = (get_value(times) * CAL_RATIO) / SCALE;
     /* if (Math.abs(Math.round((valor - Math.trunc(valor)) * 100)).toString().length == 0) {
             ceros = "00"
          } else if (Math.abs(Math.round((valor - Math.trunc(valor)) * 100)).toString().length == 1) {
@@ -197,7 +204,7 @@ namespace HX711 {
   }
 
   //% blockId="HX711_TARE" block="tare %times"
-  //% weight=95 blockGap=8
+  //% weight=70 blockGap=8
   export function tare(times: number) {
     let sum: number = 0;
     sum = read_average(times);
@@ -205,39 +212,39 @@ namespace HX711 {
   }
 
   //% blockId="HX711_SET_SCALE" block="set scale %scale"
-  //% weight=99 blockGap=8
+  //% weight=90 blockGap=8
   export function set_scale(scale: number) {
     SCALE = scale;
   }
 
   //% blockId="HX711_GET_SCALE" block="get scale"
-  //% weight=98 blockGap=8
+  //% weight=85 blockGap=8
   export function get_scale(): number {
     return SCALE;
   }
 
   //% blockId="HX711_SET_OFFSET" block="set offset %offset"
-  //% weight=97 blockGap=8
+  //% weight=80 blockGap=8
   export function set_offset(offset: number) {
     OFFSET = offset;
   }
 
   //% blockId="HX711_GET_OFFSET" block="get offset"
-  //% weight=96 blockGap=8
+  //% weight=75 blockGap=8
   export function get_offset(): number {
     return OFFSET;
   }
 
+  //% blockId="HX711_UP" block="power_up"
+  //% weight=65 blockGap=8
+  export function power_up() {
+    pins.digitalWritePin(PD_SCK, 0);
+  }
+
   //% blockId="HX711_DOWN" block="power_down"
-  //% weight=93 blockGap=16
+  //% weight=60 blockGap=32
   export function power_down() {
     pins.digitalWritePin(PD_SCK, 0);
     pins.digitalWritePin(PD_SCK, 1);
-  }
-
-  //% blockId="HX711_UP" block="power_up"
-  //% weight=94 blockGap=8
-  export function power_up() {
-    pins.digitalWritePin(PD_SCK, 0);
   }
 } /*namespace*/
