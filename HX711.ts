@@ -22,7 +22,7 @@ namespace HX711 {
    * @param pinDOUT pin at which the HX data line is connected
    * @param pinPD_SCK pin at which the HX data line is connected
    */
-  //% blockId="HX711_BEGIN" block="DT: %pinDOUT| SCK: %pinPD_SCK| begin"
+  //% blockId="HX711_BEGIN" block="DT %pinDOUT| SCK %pinPD_SCK| begin"
   //% weight=100 blockGap=8
   export function begin(pinDOUT: DigitalPin, pinPD_SCK: DigitalPin): void {
     PD_SCK = pinPD_SCK;
