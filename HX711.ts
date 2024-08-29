@@ -182,7 +182,7 @@ namespace HX711 {
   //% blockId="HX711_CALIBRATE" block="Calibrate with %weight kg"
   //% weight=95 blockGap=8
   export function calibrate(weight: number) {
-    CAL_RATIO = weight / (read_average(10) - OFFSET);
+    CAL_RATIO = weight / (get_value(10) / SCALE);
   }
 
   //% blockId="HX711_GET_UNITS" block="get N averaged final scaled value %times"
