@@ -25,7 +25,7 @@ namespace HX711 {
   //% blockId="HX711_BEGIN" block="DT:%pinDOUT| SCK:%pinPD_SCK| begin"
   //% weight=100 blockGap=8
   export function begin(pinDOUT: DigitalPin, pinPD_SCK: DigitalPin): void {
-    pinPD_SCK: DigitalPin;
+    PD_SCK = pinPD_SCK;
     DOUT = pinDOUT;
 
     set_gain(128); //default gain 128
